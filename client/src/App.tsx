@@ -1,3 +1,20 @@
+
+useEffect(() => {
+  const handleMouseMove = (e: MouseEvent) => {
+    const cursor = document.createElement('div');
+    cursor.className = 'cursor-glow';
+    document.body.appendChild(cursor);
+    
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    
+    setTimeout(() => cursor.remove(), 200);
+  };
+
+  document.addEventListener('mousemove', handleMouseMove);
+  return () => document.removeEventListener('mousemove', handleMouseMove);
+}, []);
+
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";

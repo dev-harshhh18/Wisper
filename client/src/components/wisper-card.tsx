@@ -1,6 +1,6 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, Trash2 } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Trash2 } from "lucide-react";
 import { Wisper } from "@shared/schema";
 import { useEncryption } from "@/hooks/use-encryption";
 import { useMutation } from "@tanstack/react-query";
@@ -60,6 +60,7 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
           <Button
             variant="ghost"
             size="sm"
+            className="transition-all duration-200 hover:scale-105"
             onClick={() => voteMutation.mutate({ 
               type: hasUpvoted ? 'remove-upvote' : 'upvote' 
             })}
@@ -68,6 +69,16 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
               className={`w-4 h-4 mr-2 ${hasUpvoted ? 'fill-current' : ''}`} 
             />
             {wisper.upvotes}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="transition-all duration-200 hover:scale-105"
+            onClick={() => voteMutation.mutate({ 
+              type: 'downvote'
+            })}
+          >
+            <ThumbsDown className="w-4 h-4" />
           </Button>
         </div>
         {isAuthor && (
