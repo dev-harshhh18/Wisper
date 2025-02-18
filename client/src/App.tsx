@@ -1,20 +1,3 @@
-
-useEffect(() => {
-  const handleMouseMove = (e: MouseEvent) => {
-    const cursor = document.createElement('div');
-    cursor.className = 'cursor-glow';
-    document.body.appendChild(cursor);
-    
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
-    
-    setTimeout(() => cursor.remove(), 200);
-  };
-
-  document.addEventListener('mousemove', handleMouseMove);
-  return () => document.removeEventListener('mousemove', handleMouseMove);
-}, []);
-
 import { useEffect } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Switch, Route } from "wouter";
@@ -26,6 +9,26 @@ import { ProtectedRoute } from "./lib/protected-route";
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import NotFound from "@/pages/not-found";
+
+function CursorEffect() {
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const cursor = document.createElement('div');
+      cursor.className = 'cursor-glow';
+      document.body.appendChild(cursor);
+
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+
+      setTimeout(() => cursor.remove(), 200);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    return () => document.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  return null;
+}
 
 function Router() {
   return (
@@ -42,6 +45,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
+          <CursorEffect />
           <Router />
           <Toaster />
         </AuthProvider>

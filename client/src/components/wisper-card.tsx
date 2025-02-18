@@ -1,6 +1,6 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, ThumbsDown, Trash2 } from "lucide-react";
+import { ThumbsUp, Trash2, Loader2 } from "lucide-react";
 import { Wisper } from "@shared/schema";
 import { useEncryption } from "@/hooks/use-encryption";
 import { useMutation } from "@tanstack/react-query";
@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 export function WisperCard({ wisper }: { wisper: Wisper }) {
   const { decrypt } = useEncryption();
@@ -48,46 +49,55 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
   };
 
   const isAuthor = wisper.userId === user?.id;
-  const hasUpvoted = wisper.upvotes > 0; // This is a simplification, we'll need to track user votes
+  const hasUpvoted = wisper.upvotes > 0;
 
   return (
-    <Card className="mb-4">
+    <Card className="mb-4 hover:shadow-lg transition-shadow duration-200">
       <CardContent className="pt-6">
-        <p className="text-lg">{decryptedContent}</p>
+        <p className="text-lg leading-relaxed">{decryptedContent}</p>
       </CardContent>
       <CardFooter className="flex justify-between">
         <div className="flex gap-4">
           <Button
             variant="ghost"
             size="sm"
-            className="transition-all duration-200 hover:scale-105"
+            className={cn(
+              "transition-all duration-200 hover:scale-105",
+              voteMutation.isPending && "opacity-50 cursor-not-allowed"
+            )}
             onClick={() => voteMutation.mutate({ 
               type: hasUpvoted ? 'remove-upvote' : 'upvote' 
             })}
+            disabled={voteMutation.isPending}
           >
-            <ThumbsUp 
-              className={`w-4 h-4 mr-2 ${hasUpvoted ? 'fill-current' : ''}`} 
-            />
-            {wisper.upvotes}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="transition-all duration-200 hover:scale-105"
-            onClick={() => voteMutation.mutate({ 
-              type: 'downvote'
-            })}
-          >
-            <ThumbsDown className="w-4 h-4" />
+            {voteMutation.isPending ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <ThumbsUp 
+                className={`w-4 h-4 mr-2 transition-transform duration-200 ${
+                  hasUpvoted ? 'fill-current scale-110' : ''
+                }`} 
+              />
+            )}
+            {wisper.upvotes || 0}
           </Button>
         </div>
         {isAuthor && (
           <Button
             variant="ghost"
             size="sm"
+            className={cn(
+              "text-destructive hover:text-destructive",
+              deleteMutation.isPending && "opacity-50 cursor-not-allowed"
+            )}
             onClick={() => setShowDeleteDialog(true)}
+            disabled={deleteMutation.isPending}
           >
-            <Trash2 className="w-4 h-4" />
+            {deleteMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Trash2 className="w-4 h-4" />
+            )}
           </Button>
         )}
 
