@@ -1,0 +1,65 @@
+Project Name: Wisper – An Anonymous Opinion Sharing Platform
+
+Project Overview:
+
+Wisper is a secure and anonymous web application that empowers users to share their opinions and experiences about companies, colleges, and faculty without revealing their identities. The platform fosters open expression by allowing individuals to post, comment, upvote, and downvote content, all while maintaining strict anonymity and privacy.
+
+Using modern web technologies like ReactJS (or Next.js) for the frontend, and Node.js with Express for the backend, Wisper integrates state-of-the-art security features to protect user data. These include Zero-Knowledge Proofs (ZKP) for authentication, AES-256 encryption for posts and comments, and robust password hashing methods like Argon2 and bcrypt. The platform's database employs a hybrid solution combining MongoDB and PostgreSQL for storage, and IPFS for decentralized media storage (optional).
+
+At its core, Wisper allows for fully anonymous interactions: users can post "Wispers" (anonymous posts), comment, upvote/downvote, and interact with content—without fear of their identity being compromised. The platform also integrates AI/NLP for content moderation, ensuring a safe and respectful environment.
+
+To ensure consistency across environments, scalability, and easy deployment, Docker is used to containerize the application's components. Each part of the system—frontend, backend, databases, and optional IPFS—runs in isolated Docker containers, which simplifies development, testing, and production deployment.
+
+Key Features:
+Anonymous Authentication:
+
+Zero-Knowledge Proofs (ZKP) ensure that user identities remain private while allowing secure logins.
+Email verification using SPF, and encrypted password storage with Argon2 and bcrypt.
+End-to-End Encryption (E2EE):
+
+All posts, comments, and interactions are encrypted on the client-side (AES-256), ensuring that sensitive data is never accessible to the platform.
+Anonymous Content Sharing:
+
+Users can share opinions and experiences as anonymous posts, known as "Wispers," that resemble Twitter-style posts.
+Optional anonymous commenting, upvoting, and downvoting on Wispers.
+Interactive and Real-time Features:
+
+Threaded replies similar to Reddit, where users can interact with each other while preserving anonymity.
+Real-time updates using WebSockets, ensuring instant notifications for replies or interactions.
+AI-Driven Content Moderation:
+
+Natural Language Processing (NLP) models automatically flag offensive or harmful content to ensure a safe environment for users.
+Docker-Enabled Infrastructure:
+
+Docker containers are used to package each component (frontend, backend, databases, and IPFS). This ensures consistency across different environments (development, staging, production).
+Docker Compose allows easy orchestration of multiple containers locally, making it simple to set up the entire application stack on any developer's machine.
+Containers provide better isolation, scalability, and security, ensuring that all services run optimally regardless of the host system.
+CI/CD pipeline integration for automated deployment and scaling with Docker.
+Dark/Light Theme & Customization:
+
+A smooth transition between dark and light themes, with user preferences being saved for consistent UI/UX.
+Ability to share Wispers to social media platforms like Twitter, Instagram, Facebook, etc.
+Password and Account Management:
+
+Clear communication via a pop-up before entering a password (no password reset functionality at launch).
+Future plans for implementing a password recovery feature.
+Scalable and Decentralized Infrastructure:
+
+A hybrid database architecture combining MongoDB (for unstructured data) and PostgreSQL (for structured data).
+Optional integration of IPFS for decentralized media file storage.
+Security:
+AES-256 client-side encryption to ensure that even the platform cannot access user data.
+Multi-Factor Authentication (MFA) could be implemented in future versions for additional security layers.
+A strong, anonymous password hashing process with Argon2 and bcrypt.
+Real-time privacy and security updates, maintaining full user control over personal data.
+Soft Features:
+User Engagement: Like/Dislike buttons that can only be clicked once, fostering genuine interactions.
+Content Sharing: Share your Wisper on major social platforms while maintaining anonymity.
+Popup Alert: Before setting up a password, the user is informed about the absence of a password reset feature for 5 seconds.
+Reddit-like Comment Threads: Replies to posts appear in an organized, threaded view, ensuring clarity and conversation flow.
+Vision:
+Wisper is designed to give people a voice, allowing them to speak freely about their experiences while maintaining full control over their personal information. By implementing cutting-edge encryption techniques, decentralized storage, and user anonymity, Wisper aims to create a space for unfiltered, honest, and secure feedback, with a strong commitment to user privacy.
+
+This platform is ideal for individuals seeking to share opinions or experiences about institutions or organizations but want to remain untraceable—whether for protection, freedom of expression, or simply to avoid the pressures of public identification.
+
+By integrating Docker into the platform, Wisper ensures an efficient, scalable, and secure deployment process. This allows the system to grow smoothly as user demand increases, while also maintaining consistency in development environments. Docker ensures that the platform's backend, frontend, and database services can be scaled independently, allowing for flexible resource management and future-proofing the app for increased traffic and user interactions.
