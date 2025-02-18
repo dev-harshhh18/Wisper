@@ -5,9 +5,15 @@ import session from "express-session";
 
 const MemoryStore = createMemoryStore(session);
 
+interface Vote {
+  userId: number;
+  wisperId: number;
+}
+
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private wispers: Map<number, Wisper>;
+  private votes: Vote[];
   private currentUserId: number;
   private currentWisperId: number;
   sessionStore: session.SessionStore;
@@ -15,6 +21,7 @@ export class MemStorage implements IStorage {
   constructor() {
     this.users = new Map();
     this.wispers = new Map();
+    this.votes = [];
     this.currentUserId = 1;
     this.currentWisperId = 1;
     this.sessionStore = new MemoryStore({
@@ -43,6 +50,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.wispers.values());
   }
 
+  async getWisper(id: number): Promise<Wisper | undefined> {
+    return this.wispers.get(id);
+  }
+
   async createWisper(wisper: { content: string; userId: number }): Promise<Wisper> {
     const id = this.currentWisperId++;
     const newWisper: Wisper = {
@@ -57,20 +68,36 @@ export class MemStorage implements IStorage {
     return newWisper;
   }
 
-  async upvoteWisper(id: number): Promise<Wisper | undefined> {
+  async deleteWisper(id: number): Promise<void> {
+    this.wispers.delete(id);
+    this.votes = this.votes.filter(vote => vote.wisperId !== id);
+  }
+
+  async upvoteWisper(id: number, userId: number): Promise<Wisper | undefined> {
     const wisper = this.wispers.get(id);
     if (!wisper) return undefined;
-    
-    const updated = { ...wisper, upvotes: wisper.upvotes + 1 };
+
+    const existingVote = this.votes.find(
+      v => v.userId === userId && v.wisperId === id
+    );
+
+    if (existingVote) return wisper;
+
+    this.votes.push({ userId, wisperId: id });
+    const updated = { ...wisper, upvotes: this.votes.filter(v => v.wisperId === id).length };
     this.wispers.set(id, updated);
     return updated;
   }
 
-  async downvoteWisper(id: number): Promise<Wisper | undefined> {
+  async removeUpvote(id: number, userId: number): Promise<Wisper | undefined> {
     const wisper = this.wispers.get(id);
     if (!wisper) return undefined;
-    
-    const updated = { ...wisper, downvotes: wisper.downvotes + 1 };
+
+    this.votes = this.votes.filter(
+      v => !(v.userId === userId && v.wisperId === id)
+    );
+
+    const updated = { ...wisper, upvotes: this.votes.filter(v => v.wisperId === id).length };
     this.wispers.set(id, updated);
     return updated;
   }
