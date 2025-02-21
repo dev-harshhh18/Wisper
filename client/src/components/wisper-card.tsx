@@ -26,20 +26,20 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
   const decryptedContent = decrypt(wisper.content);
 
   const voteMutation = useMutation({
-    mutationFn: async ({ type }: { type: 'upvote' | 'remove-upvote' }) => {
-      await apiRequest('POST', `/api/wispers/${wisper.id}/${type}`);
+    mutationFn: async ({ type }: { type: "upvote" | "remove-upvote" }) => {
+      await apiRequest("POST", `/api/wispers/${wisper.id}/${type}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/wispers'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/wispers"] });
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest('DELETE', `/api/wispers/${wisper.id}`);
+      await apiRequest("DELETE", `/api/wispers/${wisper.id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/wispers'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/wispers"] });
     },
   });
 
@@ -63,20 +63,22 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
             size="sm"
             className={cn(
               "transition-all duration-200 hover:scale-105",
-              voteMutation.isPending && "opacity-50 cursor-not-allowed"
+              voteMutation.isPending && "opacity-50 cursor-not-allowed",
             )}
-            onClick={() => voteMutation.mutate({ 
-              type: hasUpvoted ? 'remove-upvote' : 'upvote' 
-            })}
+            onClick={() =>
+              voteMutation.mutate({
+                type: hasUpvoted ? "remove-upvote" : "upvote",
+              })
+            }
             disabled={voteMutation.isPending}
           >
             {voteMutation.isPending ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
             ) : (
-              <ThumbsUp 
+              <ThumbsUp
                 className={`w-4 h-4 mr-2 transition-transform duration-200 ${
-                  hasUpvoted ? 'fill-current scale-110' : ''
-                }`} 
+                  hasUpvoted ? "fill-current scale-110" : ""
+                }`}
               />
             )}
             {wisper.upvotes || 0}
@@ -88,7 +90,7 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
             size="sm"
             className={cn(
               "text-destructive hover:text-destructive",
-              deleteMutation.isPending && "opacity-50 cursor-not-allowed"
+              deleteMutation.isPending && "opacity-50 cursor-not-allowed",
             )}
             onClick={() => setShowDeleteDialog(true)}
             disabled={deleteMutation.isPending}
@@ -106,12 +108,13 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete this Wisper?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. The Wisper will be permanently deleted.
+                This action cannot be undone. The Wisper will be permanently
+                deleted.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction 
+              <AlertDialogAction
                 onClick={handleDelete}
                 className="bg-destructive hover:bg-destructive/90"
               >
