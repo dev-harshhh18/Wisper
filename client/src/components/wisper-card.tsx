@@ -59,6 +59,7 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/wispers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user/wispers"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/wispers/${wisper.id}/comments`] });
     },
   });
 
