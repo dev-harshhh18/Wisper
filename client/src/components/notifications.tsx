@@ -1,60 +1,23 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from 'react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { useAuth } from '@/hooks/use-auth';
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Notification } from "@shared/schema";
-import { useAuth } from "@/hooks/use-auth";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useEncryption } from "@/hooks/use-encryption";
+
 
 export function Notifications() {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const { user } = useAuth();
-  const { decrypt } = useEncryption();
-  const [ws, setWs] = useState<WebSocket | null>(null);
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  const { data: notifications = [] } = useQuery<Notification[]>({
-    queryKey: ['/api/notifications'],
-    enabled: !!user,
-  });
 
   useEffect(() => {
-    setUnreadCount(notifications.filter(n => !n.read).length);
-  }, [notifications]);
-
-  const markAsReadMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await apiRequest("POST", `/api/notifications/${id}/read`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
-    },
-  });
-
-  useEffect(() => {
-    if (!user) return;
-
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws?userId=${user.id}`;
-    const websocket = new WebSocket(wsUrl);
-
-    websocket.onmessage = (event) => {
-      const notification = JSON.parse(event.data);
-      queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
-      setUnreadCount(prev => prev + 1);
-    };
-
-    setWs(websocket);
-
-    return () => {
-      websocket.close();
-    };
-  }, [user]);
+    if (user) {
+      fetch('/api/notifications')
+        .then(res => res.json())
+        .then(data => setNotifications(data))
+        .catch(console.error);
+    }
+  }, [user]); 
 
   const getNotificationContent = (notification: Notification) => {
     if (notification.type === 'like' || notification.type === 'comment') {
@@ -67,6 +30,12 @@ export function Notifications() {
     }
     return notification.content;
   };
+
+  const [unreadCount, setUnreadCount] = useState(0);
+  useEffect(() => {
+    setUnreadCount(notifications.filter(n => !n.read).length);
+  }, [notifications]);
+
 
   return (
     <DropdownMenu>
@@ -94,9 +63,7 @@ export function Notifications() {
                   notification.read ? 'bg-background' : 'bg-muted'
                 }`}
                 onClick={() => {
-                  if (!notification.read) {
-                    markAsReadMutation.mutate(notification.id);
-                  }
+
                 }}
               >
                 <p className="text-sm">{getNotificationContent(notification)}</p>
