@@ -1,4 +1,4 @@
-import { users, wispers, votes, notifications, type User, type Wisper, type InsertUser, type Notification } from "@shared/schema";
+import { users, wispers, votes, notifications, comments, type User, type Wisper, type InsertUser, type Notification, type Comment } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, inArray, asc, desc } from "drizzle-orm";
 import session from "express-session";
