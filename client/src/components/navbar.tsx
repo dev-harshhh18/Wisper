@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle } from "./theme-toggle";
-import { Notifications } from "./notifications";
+//import { Notifications } from "./notifications"; // Removed import
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -42,7 +42,7 @@ export function Navbar() {
 
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          {user && <Notifications />}
+          {/* Removed Notifications component */}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
