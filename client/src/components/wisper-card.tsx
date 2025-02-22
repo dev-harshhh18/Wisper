@@ -13,21 +13,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertCommentSchema } from "@shared/schema";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 export function WisperCard({ wisper }: { wisper: Wisper }) {
   const { decrypt } = useEncryption();
   const { user } = useAuth();
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const decryptedContent = decrypt(wisper.content);
 
@@ -50,8 +39,9 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
   const isAuthor = wisper.userId === user?.id;
 
   const voteMutation = useMutation({
-    mutationFn: async ({ type }: { type: "upvote" | "remove-upvote" }) => {
-      await apiRequest("POST", `/api/wispers/${wisper.id}/${type}`);
+    mutationFn: async () => {
+      if (hasVoted) return; // Prevent vote removal
+      await apiRequest("POST", `/api/wispers/${wisper.id}/upvote`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/wispers"] });
@@ -70,20 +60,6 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
     },
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("DELETE", `/api/wispers/${wisper.id}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/wispers"] });
-    },
-  });
-
-  const handleDelete = () => {
-    setShowDeleteDialog(false);
-    deleteMutation.mutate();
-  };
-
   return (
     <Card className="mb-4 hover:shadow-lg transition-shadow duration-200">
       <CardContent className="pt-6">
@@ -98,13 +74,10 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
               className={cn(
                 "transition-all duration-200 hover:scale-105",
                 voteMutation.isPending && "opacity-50 cursor-not-allowed",
+                hasVoted && "pointer-events-none", // Disable button if already voted
               )}
-              onClick={() =>
-                voteMutation.mutate({
-                  type: hasVoted ? "remove-upvote" : "upvote",
-                })
-              }
-              disabled={voteMutation.isPending}
+              onClick={() => voteMutation.mutate()}
+              disabled={voteMutation.isPending || hasVoted}
             >
               {voteMutation.isPending ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -135,25 +108,6 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
               {comments.length}
             </Button>
           </div>
-
-          {isAuthor && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                "text-destructive hover:text-destructive",
-                deleteMutation.isPending && "opacity-50 cursor-not-allowed",
-              )}
-              onClick={() => setShowDeleteDialog(true)}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Trash2 className="w-4 h-4" />
-              )}
-            </Button>
-          )}
         </div>
 
         {showComments && (
@@ -211,27 +165,6 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
           </div>
         )}
       </CardFooter>
-
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete this Wisper?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The Wisper will be permanently
-              deleted.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Card>
   );
 }

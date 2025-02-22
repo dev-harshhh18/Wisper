@@ -5,13 +5,12 @@ import { insertWisperSchema } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { useEncryption } from "@/hooks/use-encryption";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Smile, List, MapPin } from "lucide-react";
+import { Loader2, Smile } from "lucide-react";
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 import {
@@ -25,20 +24,10 @@ const BANNED_WORDS = [
   // Add more banned words as needed
 ];
 
-type PollOption = {
-  text: string;
-  votes: number;
-};
-
 export function CreateWisper() {
   const { encrypt } = useEncryption();
   const { toast } = useToast();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [isPollMode, setIsPollMode] = useState(false);
-  const [pollOptions, setPollOptions] = useState<PollOption[]>([
-    { text: '', votes: 0 },
-    { text: '', votes: 0 }
-  ]);
 
   const form = useForm({
     resolver: zodResolver(insertWisperSchema),
@@ -48,16 +37,6 @@ export function CreateWisper() {
   const addEmoji = (emoji: any) => {
     const textarea = form.getValues("content");
     form.setValue("content", textarea + emoji.native);
-  };
-
-  const addPollOption = () => {
-    setPollOptions([...pollOptions, { text: '', votes: 0 }]);
-  };
-
-  const updatePollOption = (index: number, text: string) => {
-    const newOptions = [...pollOptions];
-    newOptions[index].text = text;
-    setPollOptions(newOptions);
   };
 
   const createWisperMutation = useMutation({
@@ -74,18 +53,12 @@ export function CreateWisper() {
         throw new Error("Content contains inappropriate language");
       }
 
-      const contentToEncrypt = isPollMode ? 
-        JSON.stringify({ type: 'poll', content: data.content, options: pollOptions }) :
-        data.content;
-
-      const encrypted = encrypt(contentToEncrypt);
+      const encrypted = encrypt(data.content);
       if (!encrypted) throw new Error("Encryption failed");
       await apiRequest('POST', '/api/wispers', { content: encrypted });
     },
     onSuccess: () => {
       form.reset();
-      setIsPollMode(false);
-      setPollOptions([{ text: '', votes: 0 }, { text: '', votes: 0 }]);
       queryClient.invalidateQueries({ queryKey: ['/api/wispers'] });
       toast({
         title: "Success",
@@ -126,76 +99,24 @@ export function CreateWisper() {
                   />
                 </PopoverContent>
               </Popover>
-
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="shrink-0"
-                onClick={() => setIsPollMode(!isPollMode)}
-              >
-                <List className="h-4 w-4" />
-              </Button>
             </div>
 
-            {!isPollMode ? (
-              <FormField
-                control={form.control}
-                name="content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Share your thoughts anonymously... (minimum 20 words)"
-                        className="min-h-[100px] resize-none transition-all duration-200 focus:min-h-[150px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ) : (
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="content"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          placeholder="Poll question..."
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="space-y-2">
-                  {pollOptions.map((option, index) => (
-                    <Input
-                      key={index}
-                      value={option.text}
-                      onChange={(e) => updatePollOption(index, e.target.value)}
-                      placeholder={`Option ${index + 1}`}
+            <FormField
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Share your thoughts anonymously... (minimum 20 words)"
+                      className="min-h-[100px] resize-none transition-all duration-200 focus:min-h-[150px]"
+                      {...field}
                     />
-                  ))}
-
-                  {pollOptions.length < 4 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={addPollOption}
-                      className="w-full"
-                    >
-                      Add Option
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <Button 
               type="submit" 

@@ -10,9 +10,11 @@ import {
 import { Notification } from "@shared/schema";
 import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useEncryption } from "@/hooks/use-encryption";
 
 export function Notifications() {
   const { user } = useAuth();
+  const { decrypt } = useEncryption();
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -54,6 +56,18 @@ export function Notifications() {
     };
   }, [user]);
 
+  const getNotificationContent = (notification: Notification) => {
+    if (notification.type === 'like' || notification.type === 'comment') {
+      const match = notification.content.match(/"([^"]+)"/);
+      if (match) {
+        const encryptedContent = match[1];
+        const decryptedContent = decrypt(encryptedContent) || 'Content unavailable';
+        return notification.content.replace(match[0], `"${decryptedContent}"`);
+      }
+    }
+    return notification.content;
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -85,9 +99,9 @@ export function Notifications() {
                   }
                 }}
               >
-                <p className="text-sm">{notification.content}</p>
+                <p className="text-sm">{getNotificationContent(notification)}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {new Date(notification.createdAt).toLocaleString()}
+                  {new Date(notification.createdAt!).toLocaleString()}
                 </p>
               </div>
             ))
