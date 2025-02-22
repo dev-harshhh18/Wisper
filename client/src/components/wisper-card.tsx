@@ -51,10 +51,14 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("DELETE", `/api/wispers/${wisper.id}`);
+      const response = await apiRequest("DELETE", `/api/wispers/${wisper.id}`);
+      if (!response.ok) {
+        throw new Error('Failed to delete wisper');
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/wispers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/wispers"] });
     },
   });
 

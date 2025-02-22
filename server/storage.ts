@@ -113,6 +113,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteWisper(id: number): Promise<void> {
+    // First delete associated votes and comments
+    await db.delete(votes).where(eq(votes.wisperId, id));
+    await db.delete(comments).where(eq(comments.wisperId, id));
+    // Then delete the wisper itself
     await db.delete(wispers).where(eq(wispers.id, id));
   }
 
