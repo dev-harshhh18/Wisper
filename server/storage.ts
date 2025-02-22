@@ -1,15 +1,33 @@
-import { IStorage } from "./storage";
 import { users, wispers, votes, type User, type Wisper, type InsertUser } from "@shared/schema";
 import { db } from "./db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray, asc } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
 
 const PostgresSessionStore = connectPg(session);
 
+export interface IStorage {
+  sessionStore: session.Store;
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(insertUser: InsertUser): Promise<User>;
+  getUserWispers(userId: number): Promise<Wisper[]>;
+  getVotedWispers(userId: number): Promise<Wisper[]>;
+  getWispers(): Promise<(Wisper & { hasVoted?: boolean })[]>;
+  getWisperWithVote(wisperId: number, userId: number): Promise<{ wisper: Wisper; hasVoted: boolean }>;
+  getWisper(id: number): Promise<Wisper | undefined>;
+  createWisper(wisper: { content: string; userId: number }): Promise<Wisper>;
+  deleteWisper(id: number): Promise<void>;
+  upvoteWisper(id: number, userId: number): Promise<Wisper | undefined>;
+  removeUpvote(id: number, userId: number): Promise<Wisper | undefined>;
+  getUserVotes(userId: number): Promise<number[]>;
+  getComments(wisperId: number): Promise<Comment[]>;
+  createComment(comment: { content: string; userId: number; wisperId: number }): Promise<Comment>;
+}
+
 export class DatabaseStorage implements IStorage {
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
 
   constructor() {
     this.sessionStore = new PostgresSessionStore({
@@ -31,6 +49,28 @@ export class DatabaseStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
+  }
+
+  async getUserWispers(userId: number): Promise<Wisper[]> {
+    return await db.select().from(wispers).where(eq(wispers.userId, userId));
+  }
+
+  async getVotedWispers(userId: number): Promise<Wisper[]> {
+    const userVotes = await db
+      .select()
+      .from(votes)
+      .where(eq(votes.userId, userId));
+
+    const wisperIds = userVotes
+      .map(vote => vote.wisperId)
+      .filter((id): id is number => id !== null);
+
+    if (wisperIds.length === 0) return [];
+
+    return await db
+      .select()
+      .from(wispers)
+      .where(inArray(wispers.id, wisperIds));
   }
 
   async getWispers(): Promise<(Wisper & { hasVoted?: boolean })[]> {
@@ -98,7 +138,7 @@ export class DatabaseStorage implements IStorage {
 
     const [updatedWisper] = await db
       .update(wispers)
-      .set({ upvotes: wisper.upvotes + 1 })
+      .set({ upvotes: (wisper.upvotes || 0) + 1 })
       .where(eq(wispers.id, id))
       .returning();
 
@@ -120,7 +160,7 @@ export class DatabaseStorage implements IStorage {
 
     const [updatedWisper] = await db
       .update(wispers)
-      .set({ upvotes: Math.max(0, wisper.upvotes - 1) })
+      .set({ upvotes: Math.max(0, (wisper.upvotes || 0) - 1) })
       .where(eq(wispers.id, id))
       .returning();
 
@@ -133,7 +173,25 @@ export class DatabaseStorage implements IStorage {
       .from(votes)
       .where(eq(votes.userId, userId));
 
-    return userVotes.map(vote => vote.wisperId);
+    return userVotes
+      .map(vote => vote.wisperId)
+      .filter((id): id is number => id !== null);
+  }
+
+  async getComments(wisperId: number): Promise<Comment[]> {
+    return await db
+      .select()
+      .from(comments)
+      .where(eq(comments.wisperId, wisperId))
+      .orderBy(asc(comments.createdAt));
+  }
+
+  async createComment(comment: { content: string; userId: number; wisperId: number }): Promise<Comment> {
+    const [newComment] = await db
+      .insert(comments)
+      .values(comment)
+      .returning();
+    return newComment;
   }
 }
 

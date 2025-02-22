@@ -8,6 +8,8 @@ import { ThemeProvider } from "@/hooks/use-theme";
 import { ProtectedRoute } from "./lib/protected-route";
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
+import MyWispsPage from "@/pages/my-wisps";
+import MyVotesPage from "@/pages/my-votes";
 import NotFound from "@/pages/not-found";
 
 function CursorEffect() {
@@ -34,6 +36,8 @@ function Router() {
   return (
     <Switch>
       <ProtectedRoute path="/" component={HomePage} />
+      <ProtectedRoute path="/profile/wispers" component={MyWispsPage} />
+      <ProtectedRoute path="/profile/votes" component={MyVotesPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
