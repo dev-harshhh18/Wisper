@@ -17,6 +17,14 @@ export const wispers = pgTable("wispers", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const votes = pgTable("votes", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  wisperId: integer("wisper_id").references(() => wispers.id),
+  voteType: text("vote_type").notNull(), // 'upvote' or 'downvote'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const comments = pgTable("comments", {
   id: serial("id").primaryKey(),
   content: text("content").notNull(),
@@ -43,3 +51,4 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Wisper = typeof wispers.$inferSelect;
 export type Comment = typeof comments.$inferSelect;
+export type Vote = typeof votes.$inferSelect;

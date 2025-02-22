@@ -1,9 +1,9 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, Trash2, Loader2 } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Trash2, Loader2 } from "lucide-react";
 import { Wisper } from "@shared/schema";
 import { useEncryption } from "@/hooks/use-encryption";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -25,12 +25,21 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const decryptedContent = decrypt(wisper.content);
 
+  // Query to check if the current user has voted on this wisper
+  const { data: votes } = useQuery<number[]>({
+    queryKey: ['/api/user/votes'],
+    enabled: !!user,
+  });
+
+  const hasVoted = votes?.includes(wisper.id) ?? false;
+
   const voteMutation = useMutation({
     mutationFn: async ({ type }: { type: "upvote" | "remove-upvote" }) => {
       await apiRequest("POST", `/api/wispers/${wisper.id}/${type}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/wispers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/votes"] });
     },
   });
 
@@ -49,7 +58,6 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
   };
 
   const isAuthor = wisper.userId === user?.id;
-  const hasUpvoted = wisper.upvotes > 0;
 
   return (
     <Card className="mb-4 hover:shadow-lg transition-shadow duration-200">
@@ -67,7 +75,7 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
             )}
             onClick={() =>
               voteMutation.mutate({
-                type: hasUpvoted ? "remove-upvote" : "upvote",
+                type: hasVoted ? "remove-upvote" : "upvote",
               })
             }
             disabled={voteMutation.isPending}
@@ -77,7 +85,7 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
             ) : (
               <ThumbsUp
                 className={`w-4 h-4 mr-2 transition-transform duration-200 ${
-                  hasUpvoted ? "fill-current scale-110" : ""
+                  hasVoted ? "fill-current scale-110" : ""
                 }`}
               />
             )}

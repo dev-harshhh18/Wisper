@@ -1,5 +1,5 @@
 import { IStorage } from "./storage";
-import { users, wispers, type User, type Wisper, type InsertUser } from "@shared/schema";
+import { users, wispers, votes, type User, type Wisper, type InsertUser } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 import session from "express-session";
@@ -33,8 +33,22 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getWispers(): Promise<Wisper[]> {
-    return await db.select().from(wispers);
+  async getWispers(): Promise<(Wisper & { hasVoted?: boolean })[]> {
+    const allWispers = await db.select().from(wispers);
+    return allWispers;
+  }
+
+  async getWisperWithVote(wisperId: number, userId: number): Promise<{ wisper: Wisper; hasVoted: boolean }> {
+    const [wisper] = await db.select().from(wispers).where(eq(wispers.id, wisperId));
+    const [vote] = await db
+      .select()
+      .from(votes)
+      .where(and(eq(votes.wisperId, wisperId), eq(votes.userId, userId)));
+
+    return {
+      wisper,
+      hasVoted: !!vote,
+    };
   }
 
   async getWisper(id: number): Promise<Wisper | undefined> {
@@ -67,6 +81,21 @@ export class DatabaseStorage implements IStorage {
 
     if (!wisper) return undefined;
 
+    // Check if user has already voted
+    const [existingVote] = await db
+      .select()
+      .from(votes)
+      .where(and(eq(votes.wisperId, id), eq(votes.userId, userId)));
+
+    if (existingVote) return wisper;
+
+    // Create new vote
+    await db.insert(votes).values({
+      userId,
+      wisperId: id,
+      voteType: 'upvote'
+    });
+
     const [updatedWisper] = await db
       .update(wispers)
       .set({ upvotes: wisper.upvotes + 1 })
@@ -84,6 +113,11 @@ export class DatabaseStorage implements IStorage {
 
     if (!wisper) return undefined;
 
+    // Remove vote
+    await db
+      .delete(votes)
+      .where(and(eq(votes.wisperId, id), eq(votes.userId, userId)));
+
     const [updatedWisper] = await db
       .update(wispers)
       .set({ upvotes: Math.max(0, wisper.upvotes - 1) })
@@ -91,6 +125,15 @@ export class DatabaseStorage implements IStorage {
       .returning();
 
     return updatedWisper;
+  }
+
+  async getUserVotes(userId: number): Promise<number[]> {
+    const userVotes = await db
+      .select()
+      .from(votes)
+      .where(eq(votes.userId, userId));
+
+    return userVotes.map(vote => vote.wisperId);
   }
 }
 

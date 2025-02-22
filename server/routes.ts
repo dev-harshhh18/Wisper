@@ -39,6 +39,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendStatus(204);
   });
 
+  app.get("/api/user/votes", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    const votes = await storage.getUserVotes(req.user.id);
+    res.json(votes);
+  });
+
   app.post("/api/wispers/:id/upvote", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 

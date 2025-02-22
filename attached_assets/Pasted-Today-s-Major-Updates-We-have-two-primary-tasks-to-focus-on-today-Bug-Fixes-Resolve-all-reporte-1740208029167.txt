@@ -1,0 +1,73 @@
+Today's Major Updates
+
+We have two primary tasks to focus on today:
+
+Bug Fixes – Resolve all reported issues before proceeding with enhancements.
+
+Project Enhancements – Implement the improvements as outlined below.
+
+⚠️ Notice: Ensure that every listed issue and enhancement is properly addressed. I expect a complete and satisfactory resolution without any omissions.
+
+Bug Fixes in the Site:
+
+Like Button Issue – Currently, when a user likes a post, it appears as liked for all users. Fix this so that the like button functions individually for each user.
+
+Dark & Light Mode Transition – The transition effect is too slow. Maintain smoothness but reduce the transition duration for a more responsive experience.
+
+Missing Pages for My Likes/Votes and Wisps – There are no pages where users can view and manage their likes, votes, and whispers. Ensure that these pages are added and fully functional.
+
+Hover Light Effect in Dark Mode – When dark mode is enabled, a soft ambient white circular light should appear around the cursor on hover. This feature exists but is currently not working. Fix it.
+
+Enhancements in the Site:
+
+Privacy Policy Page – Create a well-structured Privacy Policy page with proper content. The footer should include credits:"Made in India – Harshad Nikam."
+
+Feedback Section – Add a section where users can report issues and suggest improvements. Embed the following Google Form:Feedback Form
+
+Activate My Wisps & Liked Wisps Pages – These pages should be fully functional under the Profile section.
+
+Default Maintenance Page – If any page fails to load or is unavailable, it should automatically display a message:"Page is under maintenance."
+
+Comment & Dislike Button –
+
+Add a working Comment button.
+
+Add a Dislike button, but keep the dislike count hidden from the public—only the original poster should be able to see it.
+
+Enhanced Wisp Writing Options – Expand the wisp posting feature by allowing users to:
+
+Add emojis
+
+Create polls
+
+Share their location (optionally worldwide)
+
+Notification System – Implement a notification feature within the Profile section where users receive alerts for:
+
+Likes and comments on their wisps (including a direct mention of the specific wisp)
+
+Security alerts (e.g., "New login detected") to notify users if their account is accessed from a new device or location.
+
+Major Upgrade – Docker & Local Setup
+
+Docker Containerization –
+
+Containerize the entire project to make it easily shareable.
+
+Ensure all necessary configurations are included.
+
+Shell Scripts for Local Setup –
+
+Create a shell script to install all dependencies when running the project locally.
+
+Develop another shell script to activate the project for local use.
+
+Project Directory – The project files will be stored in:
+
+/home/kali/Wisper
+
+README.md File – Write a comprehensive README.md file that provides step-by-step instructions for setting up and running the project locally including database.
+
+Final Note:
+
+Please ensure all tasks are completed accurately and efficiently. If you encounter any issues, communicate them immediately rather than leaving them unresolved.
