@@ -150,5 +150,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(comments);
   });
 
+  app.delete("/api/wispers/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    await storage.deleteWisper(parseInt(req.params.id));
+    
+    // Get updated wispers list after deletion
+    const wispers = await storage.getWispers();
+    res.json(wispers);
+  });
+
   return httpServer;
 }
