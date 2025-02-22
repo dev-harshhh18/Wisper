@@ -83,25 +83,12 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
         <div className="flex justify-between w-full">
           <div className="flex gap-4">
             <Button
-              variant="ghost"
+              variant={hasVoted ? "default" : "ghost"}
               size="sm"
-              className={cn(
-                "transition-all duration-200 hover:scale-105",
-                voteMutation.isPending && "opacity-50 cursor-not-allowed",
-                hasVoted && "pointer-events-none", // Disable button if already voted
-              )}
               onClick={() => voteMutation.mutate()}
-              disabled={voteMutation.isPending || hasVoted}
+              className={hasVoted ? "bg-primary text-primary-foreground" : ""}
             >
-              {voteMutation.isPending ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <ThumbsUp
-                  className={`w-4 h-4 mr-2 transition-transform duration-200 ${
-                    hasVoted ? "fill-current scale-110" : ""
-                  }`}
-                />
-              )}
+              <ThumbsUp className="w-4 h-4 mr-2" />
               {wisper.upvotes || 0}
             </Button>
 
