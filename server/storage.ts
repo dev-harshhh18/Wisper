@@ -1,6 +1,6 @@
-import { users, wispers, votes, type User, type Wisper, type InsertUser } from "@shared/schema";
+import { users, wispers, votes, notifications, type User, type Wisper, type InsertUser, type Notification } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, inArray, asc } from "drizzle-orm";
+import { eq, and, inArray, asc, desc } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
@@ -24,6 +24,9 @@ export interface IStorage {
   getUserVotes(userId: number): Promise<number[]>;
   getComments(wisperId: number): Promise<Comment[]>;
   createComment(comment: { content: string; userId: number; wisperId: number }): Promise<Comment>;
+  getNotifications(userId: number): Promise<Notification[]>;
+  createNotification(notification: { userId: number; type: string; content: string; wisperId: number }): Promise<Notification>;
+  markNotificationAsRead(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -192,6 +195,29 @@ export class DatabaseStorage implements IStorage {
       .values(comment)
       .returning();
     return newComment;
+  }
+
+  async getNotifications(userId: number): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async createNotification(notification: { userId: number; type: string; content: string; wisperId: number }): Promise<Notification> {
+    const [newNotification] = await db
+      .insert(notifications)
+      .values(notification)
+      .returning();
+    return newNotification;
+  }
+
+  async markNotificationAsRead(id: number): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.id, id));
   }
 }
 

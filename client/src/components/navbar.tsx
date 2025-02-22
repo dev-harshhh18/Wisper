@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle } from "./theme-toggle";
+import { Notifications } from "./notifications";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -41,7 +42,8 @@ export function Navbar() {
 
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          
+          {user && <Notifications />}
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
