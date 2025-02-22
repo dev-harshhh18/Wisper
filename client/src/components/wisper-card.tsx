@@ -40,8 +40,7 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
 
   const voteMutation = useMutation({
     mutationFn: async () => {
-      if (hasVoted) return; // Prevent vote removal
-      await apiRequest("POST", `/api/wispers/${wisper.id}/upvote`);
+      await apiRequest(hasVoted ? "DELETE" : "POST", `/api/wispers/${wisper.id}/upvote`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/wispers"] });
@@ -87,6 +86,7 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
               size="sm"
               onClick={() => voteMutation.mutate()}
               className={hasVoted ? "bg-primary text-primary-foreground" : ""}
+              disabled={voteMutation.isPending}
             >
               <ThumbsUp className="w-4 h-4 mr-2" />
               {wisper.upvotes || 0}
