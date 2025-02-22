@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { useAuth } from '@/hooks/use-auth';
@@ -5,37 +6,32 @@ import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Notification } from "@shared/schema";
 
-
 export function Notifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const { user } = useAuth();
 
   useEffect(() => {
     if (user) {
       fetch('/api/notifications')
         .then(res => res.json())
-        .then(data => setNotifications(data))
+        .then(data => {
+          setNotifications(data);
+          setUnreadCount(data.filter((n: Notification) => !n.read).length);
+        })
         .catch(console.error);
     }
-  }, [user]); 
+  }, [user]);
 
-  const getNotificationContent = (notification: Notification) => {
-    if (notification.type === 'like' || notification.type === 'comment') {
-      const match = notification.content.match(/"([^"]+)"/);
-      if (match) {
-        const encryptedContent = match[1];
-        const decryptedContent = decrypt(encryptedContent) || 'Content unavailable';
-        return notification.content.replace(match[0], `"${decryptedContent}"`);
-      }
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.read) {
+      await fetch(`/api/notifications/${notification.id}/read`, { method: 'POST' });
+      setNotifications(prev => 
+        prev.map(n => n.id === notification.id ? { ...n, read: true } : n)
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
     }
-    return notification.content;
   };
-
-  const [unreadCount, setUnreadCount] = useState(0);
-  useEffect(() => {
-    setUnreadCount(notifications.filter(n => !n.read).length);
-  }, [notifications]);
-
 
   return (
     <DropdownMenu>
@@ -62,11 +58,9 @@ export function Notifications() {
                 className={`p-4 border-b last:border-b-0 ${
                   notification.read ? 'bg-background' : 'bg-muted'
                 }`}
-                onClick={() => {
-
-                }}
+                onClick={() => handleNotificationClick(notification)}
               >
-                <p className="text-sm">{getNotificationContent(notification)}</p>
+                <p className="text-sm">{notification.content}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {new Date(notification.createdAt!).toLocaleString()}
                 </p>
