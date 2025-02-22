@@ -10,6 +10,7 @@ import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import MyWispsPage from "@/pages/my-wisps";
 import MyVotesPage from "@/pages/my-votes";
+import PrivacyPolicyPage from "@/pages/privacy-policy";
 import NotFound from "@/pages/not-found";
 
 function CursorEffect() {
@@ -39,6 +40,7 @@ function Router() {
       <ProtectedRoute path="/profile/wispers" component={MyWispsPage} />
       <ProtectedRoute path="/profile/votes" component={MyVotesPage} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/privacy-policy" component={PrivacyPolicyPage} />
       <Route component={NotFound} />
     </Switch>
   );
