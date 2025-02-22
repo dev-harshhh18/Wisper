@@ -40,7 +40,11 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
 
   const voteMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest(hasVoted ? "DELETE" : "POST", `/api/wispers/${wisper.id}/upvote`);
+      if (hasVoted) {
+        await apiRequest("POST", `/api/wispers/${wisper.id}/remove-upvote`);
+      } else {
+        await apiRequest("POST", `/api/wispers/${wisper.id}/upvote`);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/wispers"] });
