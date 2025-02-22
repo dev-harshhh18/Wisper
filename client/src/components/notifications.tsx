@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { useAuth } from '@/hooks/use-auth';
+import { useEncryption } from '@/hooks/use-encryption';
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Notification } from "@shared/schema";
@@ -10,6 +11,7 @@ export function Notifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const { user } = useAuth();
+  const { decrypt } = useEncryption();
 
   useEffect(() => {
     if (user) {

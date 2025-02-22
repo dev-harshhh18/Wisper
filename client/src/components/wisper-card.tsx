@@ -49,6 +49,15 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", `/api/wispers/${wisper.id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/wispers"] });
+    },
+  });
+
   const commentMutation = useMutation({
     mutationFn: async (data: { content: string }) => {
       const res = await apiRequest("POST", `/api/wispers/${wisper.id}/comments`, data);
@@ -107,6 +116,17 @@ export function WisperCard({ wisper }: { wisper: Wisper }) {
               <MessageSquare className="w-4 h-4 mr-2" />
               {comments.length}
             </Button>
+            {isAuthor && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => deleteMutation.mutate()}
+                className="text-destructive"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            )}
           </div>
         </div>
 
