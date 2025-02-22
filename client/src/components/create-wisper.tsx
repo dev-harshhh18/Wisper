@@ -41,9 +41,8 @@ export function CreateWisper() {
 
   const createWisperMutation = useMutation({
     mutationFn: async (data: { content: string }) => {
-      const words = data.content.split(/\s+/);
-      if (words.length < 20) {
-        throw new Error("Content must be at least 20 words long");
+      if (data.content.length < 20) {
+        throw new Error("Content must be at least 20 characters long");
       }
 
       const hasBannedWords = BANNED_WORDS.some(word => 
@@ -108,7 +107,7 @@ export function CreateWisper() {
                 <FormItem>
                   <FormControl>
                     <Textarea
-                      placeholder="Share your thoughts anonymously... (minimum 20 words)"
+                      placeholder="Share your thoughts anonymously... (minimum 20 characters)"
                       className="min-h-[100px] resize-none transition-all duration-200 focus:min-h-[150px]"
                       {...field}
                     />
