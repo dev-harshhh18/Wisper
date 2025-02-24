@@ -41,7 +41,7 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen grid md:grid-cols-2">
       {/* Login/Register Section */}
-      <div className="flex flex-col items-center justify-center p-8">
+      <div className="flex flex-col items-center justify-center p-8 mt-32">
         <Card className="w-[400px]">
           <CardHeader>
             <CardTitle>Welcome to Wisper</CardTitle>
@@ -139,7 +139,7 @@ export default function AuthPage() {
         </Card>
 
         {/* Built by Section */}
-        <div className="mt-6 text-center">
+        <div className="mt-32 text-center">
           <h3 className="text-sm font-medium text-muted-foreground">
             Built by Harshad Nikam
           </h3>
@@ -176,6 +176,17 @@ export default function AuthPage() {
                 size={18}
                 className="text-gray-900 hover:text-gray-700"
               />
+            </a>
+          </div>
+
+          {/* Copyright Section */}
+          <div className="mt-4 text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Wisper. All rights reserved by{" "}
+            <a
+              href="https://www.linkedin.com/in/harshad-nikam-311734281/"
+              target="_blank"
+            >
+              <b>Harshad Nikam</b>
             </a>
           </div>
         </div>

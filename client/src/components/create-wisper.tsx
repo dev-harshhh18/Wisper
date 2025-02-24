@@ -5,14 +5,20 @@ import { insertWisperSchema } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 import { useEncryption } from "@/hooks/use-encryption";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Smile } from "lucide-react";
-import data from '@emoji-mart/data';
-import Picker from '@emoji-mart/react';
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
 import {
   Popover,
   PopoverContent,
@@ -20,7 +26,13 @@ import {
 } from "@/components/ui/popover";
 
 const BANNED_WORDS = [
-  'racist', 'offensive', 'hate', 'slur', 'discriminate',
+  "racist",
+  "offensive",
+  "hate",
+  "slur",
+  "discriminate",
+  "Nigga",
+  "Motherfucker",
   // Add more banned words as needed
 ];
 
@@ -45,8 +57,8 @@ export function CreateWisper() {
         throw new Error("Content must be at least 20 characters long");
       }
 
-      const hasBannedWords = BANNED_WORDS.some(word => 
-        data.content.toLowerCase().includes(word)
+      const hasBannedWords = BANNED_WORDS.some((word) =>
+        data.content.toLowerCase().includes(word),
       );
       if (hasBannedWords) {
         throw new Error("Content contains inappropriate language");
@@ -54,11 +66,11 @@ export function CreateWisper() {
 
       const encrypted = encrypt(data.content);
       if (!encrypted) throw new Error("Encryption failed");
-      await apiRequest('POST', '/api/wispers', { content: encrypted });
+      await apiRequest("POST", "/api/wispers", { content: encrypted });
     },
     onSuccess: () => {
       form.reset();
-      queryClient.invalidateQueries({ queryKey: ['/api/wispers'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/wispers"] });
       toast({
         title: "Success",
         description: "Your Wisper has been posted!",
@@ -77,13 +89,18 @@ export function CreateWisper() {
     <Card className="mb-8">
       <CardContent className="pt-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit((data) => createWisperMutation.mutate(data))} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit((data) =>
+              createWisperMutation.mutate(data),
+            )}
+            className="space-y-4"
+          >
             <div className="flex gap-2 mb-4">
               <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
                 <PopoverTrigger asChild>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     size="icon"
                     className="shrink-0"
                   >
@@ -91,11 +108,7 @@ export function CreateWisper() {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Picker
-                    data={data}
-                    onEmojiSelect={addEmoji}
-                    theme="light"
-                  />
+                  <Picker data={data} onEmojiSelect={addEmoji} theme="light" />
                 </PopoverContent>
               </Popover>
             </div>
@@ -117,8 +130,8 @@ export function CreateWisper() {
               )}
             />
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full"
               disabled={createWisperMutation.isPending}
             >
@@ -128,7 +141,7 @@ export function CreateWisper() {
                   Posting...
                 </>
               ) : (
-                'Post Wisper'
+                "Post"
               )}
             </Button>
           </form>
